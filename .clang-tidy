@@ -1,0 +1,18 @@
+# WarningsAsErrors is required: without it xmake check clang.tidy exits 0 on warnings.
+Checks: >
+  -*,
+  bugprone-*,
+  performance-*,
+  modernize-*,
+  cppcoreguidelines-*,
+  -modernize-use-trailing-return-type,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -modernize-use-nodiscard,
+  -cppcoreguidelines-avoid-do-while
+
+WarningsAsErrors: '*'
+
+HeaderFilterRegex: '.*(src|apps|tests).*'
+
+FormatStyle: file

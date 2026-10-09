@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+archivos=$(git diff --cached --name-only --diff-filter=ACM || true)
+echo "$archivos" | grep -qE '\.(c|h|cpp|cppm|hpp)$' || exit 0
+
+[ -d .xmake ] || xmake f -m debug --toolchain=clang >/dev/null
+
+if ! xmake format -n -e; then
+  echo "pre-commit: format check failed, run 'xmake format' to fix"
+  exit 1
+fi

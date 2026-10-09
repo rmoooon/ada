@@ -1,0 +1,22 @@
+# xmake
+build/
+.xmake/
+compile_commands.json
+compile_flags.txt
+
+# editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# objects and binaries
+*.o
+*.obj
+*.a
+*.so
+*.out
+*.exe
+
+# benchmark data
+*.csv

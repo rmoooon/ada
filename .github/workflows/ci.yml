@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build & Test (C++23, clang 22 + libc++)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang 22, tools and libc++
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 22
+          sudo apt-get install -y clang-tools-22 clang-format-22 clang-tidy-22 \
+            libc++-22-dev libc++abi-22-dev
+          for tool in clang clang++ clang-format clang-tidy; do
+            sudo update-alternatives --install "/usr/bin/$tool" "$tool" "/usr/bin/$tool-22" 100
+            sudo update-alternatives --set "$tool" "/usr/bin/$tool-22"
+          done
+          sudo ln -sf /usr/lib/llvm-22/bin/clang-scan-deps /usr/bin/clang-scan-deps
+
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      - name: Configure debug (ASan + UBSan)
+        run: xmake f -y -c -m debug --toolchain=clang --sdk=/usr/lib/llvm-22 --runtimes=c++_shared --ldflags=-lc++abi
+
+      - name: Build
+        run: xmake -v
+
+      - name: Tests (debug)
+        run: xmake test
+
+      - name: Format check
+        run: xmake format -n -e
+
+      - name: Static analysis
+        run: xmake check clang.tidy
+
+      - name: Configure release
+        run: xmake f -y -c -m release --toolchain=clang --sdk=/usr/lib/llvm-22 --runtimes=c++_shared --ldflags=-lc++abi
+
+      - name: Build release and benchmark
+        run: |
+          xmake -v
+          xmake build bench -y
+
+      - name: Tests (release)
+        run: xmake test

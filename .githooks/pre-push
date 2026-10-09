@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+
+[ -d .xmake ] || xmake f -m debug --toolchain=clang
+
+echo "pre-push: building"
+xmake build
+
+echo "pre-push: running tests"
+xmake test
+
+echo "pre-push: clang-tidy"
+xmake check clang.tidy
+
+echo "pre-push: OK"
