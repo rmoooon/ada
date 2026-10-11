@@ -20,3 +20,12 @@ elseif is_mode("release") then
   set_symbols("hidden")
   set_optimize("fastest")
 end
+
+target("ada")
+  set_kind("moduleonly")
+  add_files("src/*.cppm")
+
+target("ada_cli")
+  set_kind("binary")
+  add_deps("ada")
+  add_files("apps/ada_cli.cpp")
