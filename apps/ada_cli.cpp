@@ -23,7 +23,8 @@ int uso(std::string_view mensaje) {
     std::cout << "error: " << mensaje << '\n';
   }
   std::cout << "uso:\n"
-               "  ada_cli potencia <base> <exponente>\n";
+               "  ada_cli potencia <base> <exponente>\n"
+               "  ada_cli matriz <n>\n";
   return 1;
 }
 
@@ -67,6 +68,37 @@ int potencia(int argc, char* const* argv) {
   return coinciden ? 0 : 1;
 }
 
+int matriz(int argc, char* const* argv) {
+  if (argc != 3) {
+    return uso("se espera la dimension");
+  }
+  const auto n = a_entero(argv[2]);
+  if (!n) {
+    return uso("la dimension debe ser un entero");
+  }
+  if (*n <= 0 || !std::in_range<std::size_t>(*n)) {
+    return uso("la dimension debe ser positiva");
+  }
+  const auto tamano = static_cast<std::size_t>(*n);
+  if (!std::has_single_bit(tamano)) {
+    return uso("la dimension debe ser potencia de dos (2, 4, 8, ...)");
+  }
+
+  const ada::Matriz a = ada::matriz_aleatoria(tamano, 9);
+  const ada::Matriz b = ada::matriz_aleatoria(tamano, 9);
+  ada::Matriz cubica;
+  ada::Matriz strassen;
+  const double ms_cubica = ada::medir_ms([&] { cubica = ada::multiplicar_cubica(a, b); });
+  const double ms_strassen = ada::medir_ms([&] { strassen = ada::multiplicar_strassen(a, b); });
+  const bool coinciden = cubica == strassen;
+
+  std::cout << "n = " << tamano << '\n'
+            << "cubica   O(n^3)     " << ms_cubica << " ms\n"
+            << "strassen O(n^2.807) " << ms_strassen << " ms\n"
+            << "coinciden: " << (coinciden ? "si" : "no") << '\n';
+  return coinciden ? 0 : 1;
+}
+
 int ejecutar(int argc, char* const* argv) {
   if (argc < 2) {
     return uso("falta la orden");
@@ -74,6 +106,9 @@ int ejecutar(int argc, char* const* argv) {
   const std::string_view orden{argv[1]};
   if (orden == "potencia") {
     return potencia(argc, argv);
+  }
+  if (orden == "matriz") {
+    return matriz(argc, argv);
   }
   return uso("orden desconocida");
 }
