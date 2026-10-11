@@ -7,6 +7,9 @@ using ada::u128;
 
 namespace {
 
+constexpr unsigned N_MAXIMO_SECUENCIAL = 184;
+constexpr unsigned N_MAXIMO_LOGARITMICO = 183;
+
 std::optional<i64> a_entero(std::string_view texto) {
   i64 valor = 0;
   const char* inicio = texto.data();
@@ -24,6 +27,7 @@ int uso(std::string_view mensaje) {
   }
   std::cout << "uso:\n"
                "  ada_cli potencia <base> <exponente>\n"
+               "  ada_cli fibonacci <n>\n"
                "  ada_cli matriz <n>\n";
   return 1;
 }
@@ -68,6 +72,42 @@ int potencia(int argc, char* const* argv) {
   return coinciden ? 0 : 1;
 }
 
+int fibonacci(int argc, char* const* argv) {
+  if (argc != 3) {
+    return uso("se espera n");
+  }
+  const auto n = a_entero(argv[2]);
+  if (!n) {
+    return uso("n debe ser un entero");
+  }
+  if (*n < 0 || !std::in_range<unsigned>(*n)) {
+    return uso("n debe estar entre 0 y 4294967295");
+  }
+  const auto k = static_cast<unsigned>(*n);
+  if (k > N_MAXIMO_SECUENCIAL) {
+    std::cout << "aviso: F(" << k << ") no cabe en 128 bits (el ultimo exacto es F(184))\n";
+    return 1;
+  }
+
+  u128 secuencial = 0;
+  const double ms_secuencial = ada::medir_ms([&] { secuencial = ada::fib_secuencial(k); });
+  std::cout << "n = " << k << '\n'
+            << "secuencial   O(n)      = " << ada::a_texto(secuencial) << "   " << ms_secuencial
+            << " ms\n";
+  if (k > N_MAXIMO_LOGARITMICO) {
+    std::cout << "aviso: la version logaritmica desborda desde n = 184\n";
+    return 0;
+  }
+
+  u128 logaritmica = 0;
+  const double ms_logaritmica = ada::medir_ms([&] { logaritmica = ada::fib_logaritmico(k); });
+  const bool coinciden = secuencial == logaritmica;
+  std::cout << "logaritmica  O(log n)  = " << ada::a_texto(logaritmica) << "   " << ms_logaritmica
+            << " ms\n"
+            << "coinciden: " << (coinciden ? "si" : "no") << '\n';
+  return coinciden ? 0 : 1;
+}
+
 int matriz(int argc, char* const* argv) {
   if (argc != 3) {
     return uso("se espera la dimension");
@@ -96,6 +136,15 @@ int matriz(int argc, char* const* argv) {
             << "cubica   O(n^3)     " << ms_cubica << " ms\n"
             << "strassen O(n^2.807) " << ms_strassen << " ms\n"
             << "coinciden: " << (coinciden ? "si" : "no") << '\n';
+
+  ada::Mat2 fibonacci_mat2;
+  fibonacci_mat2.en(0, 0) = 1;
+  fibonacci_mat2.en(0, 1) = 1;
+  fibonacci_mat2.en(1, 0) = 1;
+  const u128 por_matriz = ada::potencia_mat2(fibonacci_mat2, 90).en(0, 1);
+  std::cout << "potencia_mat2(F, 90) = " << ada::a_texto(por_matriz) << '\n'
+            << "coincide con fib_logaritmico(90): "
+            << (por_matriz == ada::fib_logaritmico(90) ? "si" : "no") << '\n';
   return coinciden ? 0 : 1;
 }
 
@@ -106,6 +155,9 @@ int ejecutar(int argc, char* const* argv) {
   const std::string_view orden{argv[1]};
   if (orden == "potencia") {
     return potencia(argc, argv);
+  }
+  if (orden == "fibonacci") {
+    return fibonacci(argc, argv);
   }
   if (orden == "matriz") {
     return matriz(argc, argv);
