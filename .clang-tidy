@@ -1,13 +1,17 @@
 # WarningsAsErrors is required: without it xmake check clang.tidy exits 0 on warnings.
+# The container-access check is off on purpose: its ExcludeClasses option has no effect
+# on clang-tidy 22 (the CI one), and indexing flat buffers is the point of ada.matriz.
 Checks: >
   -*,
   bugprone-*,
   performance-*,
   modernize-*,
   cppcoreguidelines-*,
+  -bugprone-easily-swappable-parameters,
   -modernize-use-trailing-return-type,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,
   -modernize-use-nodiscard,
   -cppcoreguidelines-avoid-do-while
 

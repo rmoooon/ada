@@ -10,6 +10,8 @@ echo "pre-push: running tests"
 xmake test
 
 echo "pre-push: clang-tidy"
+# Refresh the compdb: a stale one makes clang-tidy read BMIs from the other mode.
+xmake project -k compile_commands --lsp=clangd >/dev/null
 xmake check clang.tidy
 
 echo "pre-push: OK"

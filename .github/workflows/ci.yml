@@ -50,7 +50,9 @@ jobs:
         run: xmake format -n -e
 
       - name: Static analysis
-        run: xmake check clang.tidy
+        run: |
+          xmake project -k compile_commands --lsp=clangd
+          xmake check clang.tidy
 
       - name: Configure release
         run: xmake f -y -c -m release --toolchain=clang --sdk=/usr/lib/llvm-22 --runtimes=c++_shared --ldflags=-lc++abi
@@ -58,7 +60,7 @@ jobs:
       - name: Build release and benchmark
         run: |
           xmake -v
-          xmake build bench -y
+          xmake -y bench
 
       - name: Tests (release)
         run: xmake test

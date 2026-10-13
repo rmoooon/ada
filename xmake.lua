@@ -3,7 +3,6 @@ set_version("1.0.0")
 set_languages("c++23")
 
 add_rules("mode.debug", "mode.release")
-add_rules("plugin.compile_commands.autoupdate", { outputdir = "." })
 
 set_warnings("all", "extra", "pedantic")
 
@@ -32,7 +31,11 @@ target("ada_cli")
 
 target("pruebas")
   set_kind("binary")
-  set_default(false)
   add_deps("ada")
   add_files("tests/pruebas.cpp")
   add_tests("pruebas")
+
+target("bench")
+  set_kind("binary")
+  add_deps("ada")
+  add_files("benchmarks/comparar_complejidades.cpp")

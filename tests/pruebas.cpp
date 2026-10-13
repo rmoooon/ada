@@ -107,25 +107,27 @@ void probar_potencia() {
   verificar_igual(ada::potencia_secuencial(5, 0), u128{1}, "potencia: exponente 0");
   verificar_igual(ada::potencia_logaritmica(0, 5), u128{0}, "potencia: base 0");
   verificar_igual(ada::potencia_logaritmica(1, 1000), u128{1}, "potencia: base 1");
-  verificar_igual(ada::potencia_logaritmica(-1, 101), u128{-1}, "potencia: base -1 con exponente impar");
+  verificar_igual(ada::potencia_logaritmica(-1, 101), u128{-1},
+                  "potencia: base -1 con exponente impar");
   verificar_igual(ada::potencia_logaritmica(-2, 10), u128{1024}, "potencia: (-2)^10");
   verificar_igual(ada::potencia_logaritmica(-3, 17), u128{-129140163}, "potencia: (-3)^17");
   verificar_igual(ada::potencia_logaritmica(2, 100), potencia_de_dos(100), "potencia: 2^100");
-  verificar_igual(ada::potencia_logaritmica(-2, 101), -potencia_de_dos(100) * 2, "potencia: (-2)^101");
+  verificar_igual(ada::potencia_logaritmica(-2, 101), -potencia_de_dos(100) * 2,
+                  "potencia: (-2)^101");
 
   bool coinciden = true;
   for (i64 base = -2; base <= 3; ++base) {
     for (unsigned exponente = 0; exponente <= 40; ++exponente) {
       coinciden = coinciden && ada::potencia_secuencial(base, exponente) ==
-                                    ada::potencia_logaritmica(base, exponente);
+                                   ada::potencia_logaritmica(base, exponente);
     }
   }
   verificar(coinciden, "potencia: coinciden para bases -2..3 y exponentes 0..40");
 
   coinciden = true;
   for (unsigned exponente = 0; exponente <= 38; ++exponente) {
-    coinciden = coinciden && ada::potencia_secuencial(10, exponente) ==
-                                  ada::potencia_logaritmica(10, exponente);
+    coinciden = coinciden &&
+                ada::potencia_secuencial(10, exponente) == ada::potencia_logaritmica(10, exponente);
   }
   verificar(coinciden, "potencia: coinciden para base 10 y exponentes 0..38");
 }
@@ -168,7 +170,8 @@ void probar_matriz() {
   const ada::Matriz a = a_matriz(2, {1, 2, 3, 4});
   const ada::Matriz b = a_matriz(2, {5, 6, 7, 8});
   const ada::Matriz esperado = a_matriz(2, {19, 22, 43, 50});
-  verificar_igual(ada::multiplicar_cubica(a, b), esperado, "matriz: cubica de [[1,2],[3,4]] por [[5,6],[7,8]]");
+  verificar_igual(ada::multiplicar_cubica(a, b), esperado,
+                  "matriz: cubica de [[1,2],[3,4]] por [[5,6],[7,8]]");
   verificar_igual(ada::multiplicar_strassen(a, b), esperado, "matriz: la misma con Strassen");
 
   for (const std::size_t n : {1UZ, 2UZ, 4UZ, 8UZ, 16UZ, 32UZ, 64UZ, 128UZ}) {
@@ -179,19 +182,23 @@ void probar_matriz() {
   }
 
   const ada::Matriz m8 = ada::matriz_aleatoria(8, 9);
-  verificar_igual(ada::multiplicar_cubica(identidad(8), m8), m8, "matriz: identidad por la izquierda");
-  verificar_igual(ada::multiplicar_strassen(m8, identidad(8)), m8, "matriz: identidad por la derecha");
+  verificar_igual(ada::multiplicar_cubica(identidad(8), m8), m8,
+                  "matriz: identidad por la izquierda");
+  verificar_igual(ada::multiplicar_strassen(m8, identidad(8)), m8,
+                  "matriz: identidad por la derecha");
 
   verificar_igual(ada::multiplicar_cubica(ada::matriz_ceros(0), ada::matriz_ceros(0)),
                   ada::matriz_ceros(0), "matriz: el caso 0x0 no revienta");
-  verificar(lanza_argumento_invalido([] {
-             static_cast<void>(ada::multiplicar_cubica(ada::matriz_ceros(2), ada::matriz_ceros(3)));
-           }),
-            "matriz: la cubica rechaza dimensiones incompatibles");
-  verificar(lanza_argumento_invalido([] {
-             static_cast<void>(ada::multiplicar_strassen(ada::matriz_ceros(3), ada::matriz_ceros(3)));
-           }),
-            "matriz: Strassen exige una potencia de dos");
+  verificar(
+      lanza_argumento_invalido([] {
+        static_cast<void>(ada::multiplicar_cubica(ada::matriz_ceros(2), ada::matriz_ceros(3)));
+      }),
+      "matriz: la cubica rechaza dimensiones incompatibles");
+  verificar(
+      lanza_argumento_invalido([] {
+        static_cast<void>(ada::multiplicar_strassen(ada::matriz_ceros(3), ada::matriz_ceros(3)));
+      }),
+      "matriz: Strassen exige una potencia de dos");
 }
 
 int ejecutar() {
@@ -206,7 +213,7 @@ int ejecutar() {
   return fallidos == 0 ? 0 : 1;
 }
 
-}
+}  // namespace
 
 int main() {
   try {

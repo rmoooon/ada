@@ -15,7 +15,8 @@ std::optional<i64> a_entero(std::string_view texto) {
   const char* inicio = texto.data();
   const char* fin = texto.data() + texto.size();
   const auto [punto, error] = std::from_chars(inicio, fin, valor);
-  if (error != std::errc{} || punto != fin) {
+  if (error == std::errc::invalid_argument || error == std::errc::result_out_of_range ||
+      punto != fin) {
     return std::nullopt;
   }
   return valor;
